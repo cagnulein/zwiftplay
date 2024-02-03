@@ -11,7 +11,7 @@ import timber.log.Timber
 abstract class AbstractZapDevice {
 
     companion object {
-        internal const val LOG_RAW = false
+        internal const val LOG_RAW = true
     }
 
     private var devicePublicKeyBytes: ByteArray? = null
