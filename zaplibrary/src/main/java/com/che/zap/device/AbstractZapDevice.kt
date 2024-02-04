@@ -30,7 +30,7 @@ abstract class AbstractZapDevice {
         }
     }
 
-    abstract fun processEncryptedData(bytes: ByteArray)
+    abstract fun processEncryptedData(bytes: ByteArray) : Int
 
     fun buildHandshakeStart(): ByteArray {
         return ZapConstants.RIDE_ON.plus(ZapConstants.REQUEST_START).plus(localKeyProvider.getPublicKeyBytes())
