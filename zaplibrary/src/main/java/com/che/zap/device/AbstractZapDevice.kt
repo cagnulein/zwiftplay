@@ -18,16 +18,17 @@ abstract class AbstractZapDevice {
     private var localKeyProvider = LocalKeyProvider()
     protected var zapEncryption = ZapCrypto(localKeyProvider)
 
-    fun processCharacteristic(characteristicName: String, bytes: ByteArray?) {
-        if (bytes == null) return
+    fun processCharacteristic(characteristicName: String, bytes: ByteArray?) : Int {
+        if (bytes == null) return 0
 
         if (LOG_RAW) Timber.d("$characteristicName ${bytes.toHexString()}")
 
         when {
             bytes.startsWith(ZapConstants.RIDE_ON.plus(ZapConstants.RESPONSE_START)) -> processDevicePublicKeyResponse(bytes)
-            bytes.size > Int.SIZE_BYTES + EncryptionUtils.MAC_LENGTH -> processEncryptedData(bytes)
+            bytes.size > Int.SIZE_BYTES + EncryptionUtils.MAC_LENGTH -> return processEncryptedData(bytes)
             else -> Logger.e("Unprocessed - Data Type: ${bytes.toHexString()}")
         }
+        return 0
     }
 
     abstract fun processEncryptedData(bytes: ByteArray) : Int
