@@ -1,5 +1,6 @@
 package com.che.zap.play
 
+import android.util.Log
 import com.che.zap.device.ZapConstants.BATTERY_LEVEL_TYPE
 import com.che.zap.device.ZapConstants.CONTROLLER_NOTIFICATION_MESSAGE_TYPE
 import com.che.zap.device.ZapConstants.EMPTY_MESSAGE_TYPE
@@ -16,11 +17,12 @@ class ZwiftPlayDevice : AbstractZapDevice() {
     private var batteryLevel = 0
 
     private var lastButtonState: ControllerNotification? = null
+    var ZwiftPlayDevice: String = "ZwiftPlayDevice"
 
     override fun processEncryptedData(bytes: ByteArray) {
         try {
 
-            if (LOG_RAW) Timber.d("Decrypted: ${bytes.toHexString()}")
+            Log.d(ZwiftPlayDevice, "Decrypted: ${bytes.toHexString()}")
 
             val counter = bytes.copyOfRange(0, Int.SIZE_BYTES)
             val payload = bytes.copyOfRange(Int.SIZE_BYTES, bytes.size)
@@ -31,26 +33,26 @@ class ZwiftPlayDevice : AbstractZapDevice() {
 
             when (type) {
                 CONTROLLER_NOTIFICATION_MESSAGE_TYPE -> processButtonNotification(ControllerNotification(message))
-                EMPTY_MESSAGE_TYPE -> if (LOG_RAW) Logger.d("Empty Message") // expected when nothing happening
+                EMPTY_MESSAGE_TYPE -> if (LOG_RAW) Log.d(ZwiftPlayDevice,"Empty Message") // expected when nothing happening
                 BATTERY_LEVEL_TYPE -> {
                     val notification = BatteryStatus(message)
                     if (batteryLevel != notification.level) {
                         batteryLevel = notification.level
-                        Logger.d("Battery level update: $batteryLevel")
+                        Log.d(ZwiftPlayDevice,"Battery level update: $batteryLevel")
                     }
                 }
-                else -> Logger.e("Unprocessed - Type: ${type.toUByte().toHexString()} Data: ${data.toHexString()}")
+                else -> Log.d(ZwiftPlayDevice,"Unprocessed - Type: ${type.toUByte().toHexString()} Data: ${data.toHexString()}")
             }
 
         } catch (ex: Exception) {
-            Logger.e("Decrypt failed: " + ex.message)
+            Log.d(ZwiftPlayDevice,"Decrypt failed: " + ex.message)
         }
     }
 
     private fun processButtonNotification(notification: ControllerNotification) {
         if (lastButtonState == null)
             Logger.d(notification.toString())
-        else {
+        else {  
             val diff = notification.diff(lastButtonState!!)
             if (!diff.isNullOrBlank()) // get repeats of the same state
                 Logger.d(diff)
